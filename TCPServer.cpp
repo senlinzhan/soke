@@ -8,7 +8,11 @@
 #include <strings.h>
 #include <arpa/inet.h>
 
-TCPServer::TCPServer(const std::string &addr, unsigned short port)
+using std::string;
+using std::tuple;
+using std::shared_ptr;
+
+TCPServer::TCPServer(const string &addr, unsigned short port)
     : addr_(addr), port_(port)
 {
     struct addrinfo hints;
@@ -62,15 +66,18 @@ TCPServer::TCPServer(const std::string &addr, unsigned short port)
     }
 }
 
-IPAddress TCPServer::accept()
-{
+
+shared_ptr<tuple<int, IPAddress>> TCPServer::accept()
+{  
     sockaddr_storage addr;
     socklen_t len = sizeof(addr);
-    if (::accept(sockfd_, reinterpret_cast<sockaddr *>(&addr), &len) == -1)
+    int clientSockfd = ::accept(sockfd_, reinterpret_cast<sockaddr *>(&addr), &len);
+    if (clientSockfd == -1)
     {
         throw TCPServerError("TCPServer::accept() accept error", errno);
     }
-    return IPAddress(addr);
+    
+    return std::make_shared<tuple<int, IPAddress>>(clientSockfd, IPAddress(addr));
 }
 
 TCPServer::~TCPServer()

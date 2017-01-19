@@ -13,7 +13,7 @@ public:
     TCPServer(const TCPServer &) = delete;
     TCPServer &operator=(const TCPServer &) = delete;
 
-    IPAddress accept();
+    std::shared_ptr<std::tuple<int, IPAddress>> accept();
     
 private:
     static constexpr int BACKLOG = 128;
