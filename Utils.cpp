@@ -79,36 +79,3 @@ bool is_double_str(const std::string &str)
     }
     return is_double;
 }
-
-double mean_value(const std::vector<double> &v) 
-{
-    return range_sum(v.cbegin(), v.cend()) / v.size();
-}
-
-double standard_deviation(const std::vector<double> &v)    
-{
-    double mean = mean_value(v);
-    return std::accumulate(v.cbegin(), v.cend(), 0.0,
-			   [&mean, &v] (double init, double elem) {
-			       return  init + std::pow((elem - mean), 2) / v.size();
-			   });
-}
-
-double median(const std::vector<double> &v)
-{
-    if (!std::is_sorted(v.cbegin(), v.cend()))
-    {
-	throw std::invalid_argument("the array is not sorted");
-    }
-    
-    if (v.empty()) {
-	return 0.0;
-    }
-    auto mid = v.size() / 2;
-    if (v.size() % 2 == 0)
-    {
-	return (v[mid - 1] + v[mid]) / 2;	
-    }
-    return v[mid];    
-}
-

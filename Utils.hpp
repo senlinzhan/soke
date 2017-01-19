@@ -64,14 +64,4 @@ range_sum(InputIterator first, InputIterator last)
     return initValue;
 }
 
-double mean_value(const std::vector<double> &v);
-
-// the median of the array
-double median(const std::vector<double> &v);
-
-
-// The standard deviation of the array
-double standard_deviation(const std::vector<double> &v);
-
-
 #endif /* UTILS_H */
