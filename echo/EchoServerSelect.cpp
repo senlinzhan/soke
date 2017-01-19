@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         } catch (const TCPServerError &e) {
             std::cerr << e.what() << std::endl;
         }
-    }
+    } 
     
     return 0;
 }
