@@ -50,8 +50,7 @@ bool IPAddress::isIPv6() const
  
 
 size_t IPAddress::size() const
-{
-  
+{  
     return size_;    
 }
 

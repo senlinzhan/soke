@@ -76,8 +76,8 @@ shared_ptr<TCPConnection> TCPServer::accept()
     {
         throw TCPServerError("TCPServer::accept() accept error", errno);
     }
-
-    return std::make_shared<TCPConnection>(clientSockfd, std::move(addr));
+    
+    return std::make_shared<TCPConnection>(clientSockfd, IPAddress(addr));
 }
 
 TCPServer::~TCPServer()

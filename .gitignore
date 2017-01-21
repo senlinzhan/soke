@@ -27,6 +27,16 @@
 *.exe
 *.out
 *.app
+*.i*86
+*.x86_64
+*.hex
 
 # emacs backup files
 *~
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+

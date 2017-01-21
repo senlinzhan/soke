@@ -6,9 +6,11 @@
 #include <iostream>
 #include <unistd.h>
 
-void handleClient(int sockfd)
+void handleClient(std::shared_ptr<TCPConnection> conn)    
 {
     static constexpr int MAXLINE = 8196;
+
+    int sockfd = conn->sockfd();    
     char buf[MAXLINE];
 
     ssize_t n;
@@ -16,7 +18,7 @@ void handleClient(int sockfd)
     while (true) {
         n = read(sockfd, buf, MAXLINE);
         if (n == 0) {
-            std::cerr << "handleClient(): connection close by client" << std::endl;
+            std::cerr << "connection close by client[" << conn->address() << "]" << std::endl;
             return;
         }
         if (n > 0) {
@@ -42,34 +44,29 @@ int main(int argc, char *argv[])
         std::cerr << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
-
-    /*
+   
     while (true)
     {
-        decltype(server->accept()) ptr;
+        std::shared_ptr<TCPConnection> conn;
         try {
-            ptr = server->accept();
+            conn = server->accept();
+            std::cout << "accept new connection[" << conn->address() << "]" << std::endl;
+           
         } catch (const TCPServerError &e) {
             std::cerr << e.what() << std::endl;
             continue;
         }
         
-        std::cout << "accept success" << std::endl;        
         auto n = fork();
         if (n == -1) {
             std::cerr << "fork error: %s" << strerror(errno) << std::endl;
             exit(EXIT_FAILURE);
         }
         if (n == 0) {
-            server.reset();
-            handleClient(sockfd);
+            handleClient(conn);
             exit(EXIT_SUCCESS);
-        } else {
-            close(sockfd);
         } 
-
     }
-    */
+
     return 0;
 }
-

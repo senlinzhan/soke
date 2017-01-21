@@ -14,6 +14,9 @@ public:
     
     ~TCPConnection();
 
+    int sockfd() const;
+    std::string address() const;
+    
 private:
     int sockfd_;
     IPAddress addr_;

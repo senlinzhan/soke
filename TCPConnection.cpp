@@ -15,3 +15,13 @@ TCPConnection::~TCPConnection()
 {
     close(sockfd_);
 }
+
+int TCPConnection::sockfd() const
+{
+    return sockfd_;
+}
+
+std::string TCPConnection::address() const
+{
+    return addr_.toString();
+}
