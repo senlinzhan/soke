@@ -2,6 +2,8 @@
 #define TCPSERVER_H
 
 #include "IPAddress.hpp"
+#include "TCPConnection.hpp"
+
 #include <string>
 
 class TCPServer
@@ -13,7 +15,7 @@ public:
     TCPServer(const TCPServer &) = delete;
     TCPServer &operator=(const TCPServer &) = delete;
 
-    std::shared_ptr<std::tuple<int, IPAddress>> accept();
+    std::shared_ptr<TCPConnection> accept();
     
 private:
     static constexpr int BACKLOG = 128;
@@ -54,7 +56,6 @@ private:
     std::string message_;
     int error_code_;
 };
-
 
 
 #endif /* TCPSERVER_H */

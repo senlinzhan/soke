@@ -34,7 +34,7 @@ IPAddress::IPAddress(const sockaddr_storage &addr)
     }
     
     ip_ = std::string(ptr);
-    port_ = std::to_string(port);    
+    port_ = port;
 }
 
 
@@ -47,7 +47,7 @@ bool IPAddress::isIPv6() const
 {
     return addr_.ss_family == AF_INET6;    
 }
-
+ 
 
 size_t IPAddress::size() const
 {
@@ -57,7 +57,7 @@ size_t IPAddress::size() const
 
 std::string IPAddress::toString() const
 {
-    return IPAddr() + ":" + port();    
+    return IPAddr() + ":" + std::to_string(port_);    
 }
 
 std::string IPAddress::IPAddr() const
@@ -65,7 +65,7 @@ std::string IPAddress::IPAddr() const
     return ip_;    
 }
 
-std::string IPAddress::port() const
+unsigned short IPAddress::port() const
 {
     return port_;
 }

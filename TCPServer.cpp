@@ -67,7 +67,7 @@ TCPServer::TCPServer(const string &addr, unsigned short port)
 }
 
 
-shared_ptr<tuple<int, IPAddress>> TCPServer::accept()
+shared_ptr<TCPConnection> TCPServer::accept()
 {  
     sockaddr_storage addr;
     socklen_t len = sizeof(addr);
@@ -76,8 +76,8 @@ shared_ptr<tuple<int, IPAddress>> TCPServer::accept()
     {
         throw TCPServerError("TCPServer::accept() accept error", errno);
     }
-    
-    return std::make_shared<tuple<int, IPAddress>>(clientSockfd, IPAddress(addr));
+
+    return std::make_shared<TCPConnection>(clientSockfd, std::move(addr));
 }
 
 TCPServer::~TCPServer()

@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    server->accept();
     /*
     while (true)
     {
@@ -55,11 +54,7 @@ int main(int argc, char *argv[])
             continue;
         }
         
-        std::cout << "accept success" << std::endl;
-        auto sockfd = std::get<0>(*ptr);
-        auto addr = std::get<1>(*ptr);
-        
-        std::cout << "connection from client - " << addr.toString() << std::endl;        
+        std::cout << "accept success" << std::endl;        
         auto n = fork();
         if (n == -1) {
             std::cerr << "fork error: %s" << strerror(errno) << std::endl;
@@ -73,7 +68,7 @@ int main(int argc, char *argv[])
             close(sockfd);
         } 
 
-    } 
+    }
     */
     return 0;
 }

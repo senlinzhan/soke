@@ -39,7 +39,7 @@ public:
     size_t size() const;    
 
     std::string IPAddr() const;
-    std::string port() const;    
+    unsigned short port() const;
 
     std::string toString() const;    
 
@@ -48,7 +48,7 @@ private:
     
     sockaddr_storage addr_;
     std::string ip_;
-    std::string port_;    
+    unsigned short port_;    
 };
 
 
