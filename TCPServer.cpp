@@ -24,8 +24,7 @@ TCPServer::TCPServer(const string &addr, unsigned short port)
 
     auto service = std::to_string(port_);
 
-    struct addrinfo *result;
-
+    struct addrinfo *result = nullptr;
     int n = getaddrinfo(addr_.c_str(), service.c_str(), &hints, &result);
     if (n != 0 || result == nullptr)
     {
