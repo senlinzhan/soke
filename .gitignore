@@ -40,3 +40,6 @@
 *.idb
 *.pdb
 *.DS_Store
+
+echo/client
+echo/server

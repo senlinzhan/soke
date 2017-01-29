@@ -2,6 +2,7 @@
 #define TCPCLIENT_H
 
 #include <string>
+#include <string.h>
 
 class TCPClient
 {
@@ -26,7 +27,7 @@ public:
     {
 	if (has_error_code())
 	{
-	    message_ = message_ + ": " + std::strerror(error_code_) +
+	    message_ = message_ + ": " + ::strerror(error_code_) +
 		", error code: " + std::to_string(error_code_);
 	}
     }
