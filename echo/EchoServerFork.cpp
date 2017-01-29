@@ -8,7 +8,7 @@
 
 void handleClient(std::shared_ptr<TCPConnection> conn)    
 {
-    static constexpr int MAXLINE = 8196;
+    static constexpr int MAXLINE = 8192;
 
     int sockfd = conn->sockfd();    
     char buf[MAXLINE];
@@ -16,21 +16,25 @@ void handleClient(std::shared_ptr<TCPConnection> conn)
     ssize_t n;
 
     while (true) {
-        n = read(sockfd, buf, MAXLINE);
+        n = read(sockfd, buf, MAXLINE - 1);
         if (n == 0) {
             std::cerr << "connection close by client[" << conn->address() << "]" << std::endl;
             return;
         }
         if (n > 0) {
+            buf[n] = '\0';
+            std::cout << "read from client[" << conn->address() << "]: " << buf << std::endl;
             if (writen(sockfd, buf, n) == -1) {
                 std::cerr << "handleClient(): write error - " << strerror(errno) << std::endl;
                 exit(EXIT_FAILURE);
-            }            
-        } else {
-            if (n == -1 && errno != EINTR) {
-                std::cerr << "handleClient(): read error - " << strerror(errno) << std::endl;
-                exit(EXIT_FAILURE);
             }
+            else
+            {
+                std::cout << "write to client[" << conn->address() << "]: " << buf << std::endl;
+            }
+        } else if (n == -1 && errno != EINTR){
+            std::cerr << "handleClient(): read error - " << strerror(errno) << std::endl;
+            exit(EXIT_FAILURE);
         }        
     }
 }

@@ -54,6 +54,12 @@ TCPClient::TCPClient(const string &host, unsigned short port)
 }
 
 
+int TCPClient::sockfd() const
+{
+    return sockfd_;
+}
+
+
 TCPClient::~TCPClient()
 {
     close(sockfd_);

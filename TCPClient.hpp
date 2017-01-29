@@ -12,6 +12,7 @@ public:
     TCPClient(const TCPClient &) = delete;
     TCPClient &operator=(const TCPClient &) = delete;
 
+    int sockfd() const;
 private:
     int sockfd_;
 };

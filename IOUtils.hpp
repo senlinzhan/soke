@@ -95,11 +95,11 @@ public:
             {
                 return 0;
             }
-            pos_ = buf_;
+            pos_ = buf_;            
         }
-
+        
         int count = std::min(static_cast<int>(n), unreadBytes_);
-        memcpy(userBuff, buf_, count);
+        memcpy(userBuff, pos_, count);
         unreadBytes_ -= count;
         pos_ += count;
 
@@ -110,30 +110,22 @@ public:
     {
         char *ptr = static_cast<char *>(userBuff);
         
-        char c;        
-        int i = 0;        
-        for (; i < maxLen - 1; i++)
+        int i;      
+        for (i = 0; i < maxLen - 1; i++)
         {
+            char c;        
             int n = read(&c, 1);
-            if (n == 1)
+            if (n == -1)
             {
-                *ptr++ = c;
-                if (c == '\n') {
-                    i++;
-                    break;
-                }
+                return -1;
             }
             else if (n == 0)
             {
-                if (i == 0) {
-                    return 0;
-                } else {
-                    break;
-                }
-            }
-            else
-            {
-                return -1;
+                break;
+            }            
+            *ptr++ = c;
+            if (c == '\n') {
+                break;
             }
         }
 
