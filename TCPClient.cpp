@@ -26,7 +26,6 @@ TCPClient::TCPClient(const string &host, unsigned short port)
         throw TCPClientError("TCPClient::TCPClient() - invalid address: \"" +
                              host + ":" + service + "\"", errno);
     }
-
     
     int sockfd;
     auto ptr = result;

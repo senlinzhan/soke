@@ -4,10 +4,10 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <functional>
 #include <unistd.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <string.h>
 
 typedef void (*sighandler_t)(int);
 
