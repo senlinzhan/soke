@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    static constexpr int MAXLINE = 8196;
+    static constexpr int MAXLINE = 8192;
 
     char sendline[MAXLINE], recvline[MAXLINE];
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        std::cerr << "connection close by user input" << std::endl;
+        std::cout << "connection close by user input" << std::endl;
     }
     
     return 0;

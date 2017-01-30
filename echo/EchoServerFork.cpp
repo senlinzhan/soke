@@ -1,5 +1,6 @@
 #include "../TCPServer.hpp"
 #include "../IOUtils.hpp"
+#include "../SysUtils.hpp"
 
 #include <cstdlib>
 #include <memory>
@@ -27,9 +28,7 @@ void handleClient(std::shared_ptr<TCPConnection> conn)
             if (writen(sockfd, buf, n) == -1) {
                 std::cerr << "handleClient(): write error - " << strerror(errno) << std::endl;
                 exit(EXIT_FAILURE);
-            }
-            else
-            {
+            } else {
                 std::cout << "write to client[" << conn->address() << "]: " << buf << std::endl;
             }
         } else if (n == -1 && errno != EINTR){
@@ -39,8 +38,13 @@ void handleClient(std::shared_ptr<TCPConnection> conn)
     }
 }
 
+
+
 int main(int argc, char *argv[])
-{
+{ 
+    Signal(SIGCHLD, sigchld_handler);
+    Signal(SIGPIPE, SIG_IGN);
+    
     std::unique_ptr<TCPServer> server = nullptr;
     try {
         server.reset(new TCPServer("0.0.0.0", 9388));            
@@ -54,8 +58,7 @@ int main(int argc, char *argv[])
         std::shared_ptr<TCPConnection> conn;
         try {
             conn = server->accept();
-            std::cout << "accept new connection[" << conn->address() << "]" << std::endl;
-           
+            std::cout << "accept new connection[" << conn->address() << "]" << std::endl;           
         } catch (const TCPServerError &e) {
             std::cerr << e.what() << std::endl;
             continue;
