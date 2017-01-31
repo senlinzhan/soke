@@ -12,12 +12,12 @@ void handleClient(std::shared_ptr<TCPConnection> conn)
     static constexpr int MAXLINE = 8192;
 
     int sockfd = conn->sockfd();    
-    char buf[MAXLINE];
+    char buf[MAXLINE + 1];
 
     ssize_t n;
 
     while (true) {
-        n = read(sockfd, buf, MAXLINE - 1);
+        n = read(sockfd, buf, MAXLINE);
         if (n == 0) {
             std::cerr << "connection close by client[" << conn->address() << "]" << std::endl;
             return;
