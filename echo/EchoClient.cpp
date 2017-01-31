@@ -26,18 +26,14 @@ int main(int argc, char *argv[])
     
     static constexpr int MAXLINE = 8192;
     char buf[MAXLINE];
-    
-    std::unordered_set<int> fds = {
-        client->sockfd(),
-        fileno(stdin)
-    };
-    
+        
     while (true)
     {
-        for (auto fd: fds )
-        {
-            FD_SET(fd, &readSet);
-        }        
+        if (!isStdinEOF) {
+            FD_SET(fileno(stdin), &readSet);
+        }
+        FD_SET(client->sockfd(), &readSet);
+
         int maxfd = std::max(fileno(stdin), client->sockfd()) + 1;
         int readNum = select(maxfd, &readSet, nullptr, nullptr, nullptr);
         if (readNum == -1)
@@ -92,7 +88,6 @@ int main(int argc, char *argv[])
                 shutdown(client->sockfd(), SHUT_WR);
                 isStdinEOF = true;
                 FD_CLR(fileno(stdin), &readSet);
-                fds.erase(fileno(stdin));
                 std::cout << "connection close by user input" << std::endl;
                 continue;                
             }
