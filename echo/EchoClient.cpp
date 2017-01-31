@@ -32,7 +32,6 @@ int main(int argc, char *argv[])
         fileno(stdin)
     };
     
-    Rio rio(client->sockfd());
     while (true)
     {
         for (auto fd: fds )
