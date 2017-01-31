@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     FD_ZERO(&readSet);    
     
     static constexpr int MAXLINE = 8192;
-    char sendline[MAXLINE], recvline[MAXLINE];
-
+    char buf[MAXLINE];
+    
     std::unordered_set<int> fds = {
         client->sockfd(),
         fileno(stdin)
@@ -48,7 +48,11 @@ int main(int argc, char *argv[])
         }
         if (FD_ISSET(client->sockfd(), &readSet))
         {
-            ssize_t n = rio.readline(recvline, MAXLINE);
+            ssize_t n;
+            do {
+                n = read(client->sockfd(), buf, MAXLINE);
+            } while (n == -1 && errno == EINTR);
+            
             if (n == -1)
             {
                 std::cerr << "error when read from network: " << strerror(errno) << std::endl;
@@ -63,35 +67,37 @@ int main(int argc, char *argv[])
                 }
                 std::cout << "connection close by server" << std::endl;
                 exit(EXIT_SUCCESS);
-            }       
-            if (fputs(recvline, stdout) == EOF)
+            }
+            n = writen(fileno(stdout), buf, n);
+            if (n == -1)
             {
-                std::cerr << "error when write to stdout" << std::endl;
+                std::cerr << "error when write to stdout" << strerror(errno) << std::endl;
                 exit(EXIT_FAILURE);
-            }            
+            }
         }
 
         if (FD_ISSET(fileno(stdin), &readSet))
         {
-            auto ptr = fgets(sendline, MAXLINE, stdin);
-            if (ptr == nullptr)
+            ssize_t n;
+            do {
+                n = read(fileno(stdin), buf, MAXLINE);
+            } while (n == -1 && errno == EINTR);
+
+            if (n == -1)
             {
-                if (ferror(stdin))
-                {
-                    std::cerr << "error when read from stdin: " << strerror(errno) << std::endl;
-                    exit(EXIT_FAILURE);
-                }
-                else
-                {
-                    shutdown(client->sockfd(), SHUT_WR);
-                    isStdinEOF = true;
-                    FD_CLR(fileno(stdin), &readSet);
-                    fds.erase(fileno(stdin));
-                    std::cout << "connection close by user input" << std::endl;
-                    continue;
-                }                
+                std::cerr << "error when read from stdin: " << strerror(errno) << std::endl;
+                exit(EXIT_FAILURE);                    
             }
-            ssize_t n = writen(client->sockfd(), sendline, strlen(sendline));
+            else if (n == 0)
+            {
+                shutdown(client->sockfd(), SHUT_WR);
+                isStdinEOF = true;
+                FD_CLR(fileno(stdin), &readSet);
+                fds.erase(fileno(stdin));
+                std::cout << "connection close by user input" << std::endl;
+                continue;                
+            }
+            n = writen(client->sockfd(), buf, n);
             if (n == -1)
             {
                 std::cerr << "error when write to network: " << strerror(errno) << std::endl;
