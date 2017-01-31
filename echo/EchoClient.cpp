@@ -3,9 +3,11 @@
 
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
 #include <memory>
+#include <unordered_set>
 
 int main(int argc, char *argv[])
 {
@@ -17,18 +19,26 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    bool isStdinEOF = false;
+    
     fd_set readSet;
     FD_ZERO(&readSet);    
     
     static constexpr int MAXLINE = 8192;
     char sendline[MAXLINE], recvline[MAXLINE];
 
+    std::unordered_set<int> fds = {
+        client->sockfd(),
+        fileno(stdin)
+    };
+    
     Rio rio(client->sockfd());
     while (true)
     {
-        FD_SET(fileno(stdin), &readSet);
-        FD_SET(client->sockfd(), &readSet);
-        
+        for (auto fd: fds )
+        {
+            FD_SET(fd, &readSet);
+        }        
         int maxfd = std::max(fileno(stdin), client->sockfd()) + 1;
         int readNum = select(maxfd, &readSet, nullptr, nullptr, nullptr);
         if (readNum == -1)
@@ -46,8 +56,13 @@ int main(int argc, char *argv[])
             }
             else if (n == 0)
             {
-                std::cerr << "connection close by server" << std::endl;
-                exit(EXIT_FAILURE);
+                if (!isStdinEOF)
+                {
+                    std::cerr << "server terminated prematurely" << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                std::cout << "connection close by server" << std::endl;
+                exit(EXIT_SUCCESS);
             }       
             if (fputs(recvline, stdout) == EOF)
             {
@@ -68,8 +83,12 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
+                    shutdown(client->sockfd(), SHUT_WR);
+                    isStdinEOF = true;
+                    FD_CLR(fileno(stdin), &readSet);
+                    fds.erase(fileno(stdin));
                     std::cout << "connection close by user input" << std::endl;
-                    exit(EXIT_SUCCESS);
+                    continue;
                 }                
             }
             ssize_t n = writen(client->sockfd(), sendline, strlen(sendline));
