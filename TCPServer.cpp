@@ -83,3 +83,8 @@ TCPServer::~TCPServer()
 {
     close(sockfd_);
 }
+
+int TCPServer::sockfd() const
+{
+    return sockfd_;
+}

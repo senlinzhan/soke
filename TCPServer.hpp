@@ -18,6 +18,7 @@ public:
     TCPServer &operator=(const TCPServer &) = delete;
 
     std::shared_ptr<TCPConnection> accept();
+    int sockfd() const;
     
 private:
     static constexpr int BACKLOG = 128;
