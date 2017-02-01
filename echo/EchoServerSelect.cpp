@@ -49,12 +49,12 @@ int main(int argc, char *argv[])
                 std::cerr << e.what() << std::endl;
                 continue;
             }
-            connections[conn->sockfd()] = conn;            
-            if (connections.size() > FD_SETSIZE)
+            if (conn->sockfd() >= FD_SETSIZE)
             {
                 std::cerr << "too many clients" << std::endl;
                 exit(EXIT_FAILURE);
             }
+            connections[conn->sockfd()] = conn;            
             FD_SET(conn->sockfd(), &allSet);
             maxfd = std::max(maxfd, conn->sockfd());
             if (--readNum <= 0)
@@ -67,7 +67,6 @@ int main(int argc, char *argv[])
         {
             auto fd = elem.first;
             auto conn = elem.second;
-            
             if (FD_ISSET(fd, &readSet))
             {
                 ssize_t n;

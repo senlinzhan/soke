@@ -38,8 +38,6 @@ void handleClient(std::shared_ptr<TCPConnection> conn)
     }
 }
 
-
-
 int main(int argc, char *argv[])
 { 
     Signal(SIGCHLD, sigchld_handler);
