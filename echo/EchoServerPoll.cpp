@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <set>
 #include <map>
+#include <vector>
+#include <poll.h>
 
 int main(int argc, char *argv[])
 {
@@ -22,27 +24,27 @@ int main(int argc, char *argv[])
     static constexpr int MAXLINE = 8192;
     char buf[MAXLINE];
     
-    fd_set allSet;
-    FD_ZERO(&allSet);
-    FD_SET(server->sockfd(), &allSet);
-    int maxfd = server->sockfd();
-
+    std::vector<pollfd> clients = {
+        pollfd {
+            .fd = server->sockfd(),
+            .events = POLLIN
+        }
+    };
     std::map<int, std::shared_ptr<TCPConnection>> connections;
     
     while (true)
     {
-        fd_set readSet = allSet;
-        int readNum = select(maxfd + 1, &readSet, nullptr, nullptr, nullptr);
-        if (readNum == -1)
+        int readyNum = poll(clients.data(), clients.size(), -1);
+        if (readyNum == -1)
         {
-            if (errno == EINTR) {
+            if (errno == EINTR)
+            {
                 continue;
             }
-            std::cerr << "error when call select(): " << strerror(errno) << std::endl;
+            std::cerr << "error when call poll(): " << std::endl;
             exit(EXIT_FAILURE);
         }
-
-        if (FD_ISSET(server->sockfd(), &readSet))
+        if (clients[0].revents & POLLIN)
         {
             std::shared_ptr<TCPConnection> conn;
             try {
@@ -52,64 +54,71 @@ int main(int argc, char *argv[])
                 std::cerr << e.what() << std::endl;
                 continue;
             }
-            if (conn->sockfd() >= FD_SETSIZE)
+            int i = 1;
+            for (; i < clients.size(); ++i)
             {
-                std::cerr << "too many clients" << std::endl;
-                exit(EXIT_FAILURE);
+                if (clients[i].fd == -1)
+                {
+                    clients[i].fd = conn->sockfd();
+                    break;
+                }
             }
-            connections[conn->sockfd()] = conn;            
-            FD_SET(conn->sockfd(), &allSet);
-            maxfd = std::max(maxfd, conn->sockfd());
-            if (--readNum <= 0)
+            if (i == clients.size())
+            {
+                clients.push_back(pollfd{.fd = conn->sockfd(), .events = POLLIN});                
+            }            
+            connections[conn->sockfd()] = conn;
+            if (--readyNum <= 0)
             {
                 continue;
             }
         }
 
-        for (auto elem: connections)
+        for (int i = 1; i < clients.size(); ++i)
         {
-            auto fd = elem.first;
-            auto conn = elem.second;
-            if (FD_ISSET(fd, &readSet))
+            int fd = clients[i].fd;
+            if (fd < 0) {
+                continue;
+            }
+            if (clients[i].revents & (POLLIN | POLLERR))
             {
                 ssize_t n;
                 do {
                     n = read(fd, buf, MAXLINE);
-                } while (n == -1 && errno == EINTR);                                
+                } while (n == -1 && errno == EINTR);                
 
                 if (n > 0)
-                {                    
-                    if (writen(fd, buf, n) < 0)
-                    {
-                        std::cerr << "error when write to socket-" << fd << ": " << strerror(errno) << std::endl;                        
+                {
+                    if (writen(fd, buf, n) == -1)
+                    {                        
+                        std::cerr << "error when write to socket-" << fd << ": " << strerror(errno) << std::endl;
                         std::cerr << "socket-" << fd << " close by server" << std::endl;
-                        FD_CLR(fd, &allSet);
+                        clients[i].fd = -1;
                         connections.erase(fd);
                     }
                 }
                 else
-                { 
+                {
                     if (n == 0)
                     {
-                        std::cerr << "connection close by client[" << conn->address() << "]" << std::endl;
+                        std::cerr << "connection close by client[" << connections[fd]->address() << "]" << std::endl;
                     }
                     else
                     {
                         std::cerr << "error when read from socket-" << fd << ": " << strerror(errno) << std::endl;
                     }
                     std::cerr << "socket-" << fd << " close by server" << std::endl;
-                    FD_CLR(fd, &allSet);
+                    clients[i].fd = -1;
                     connections.erase(fd);
                 }
-                
-                if (--readNum <= 0)
+                if (--readyNum <= 0)
                 {
                     break;
                 }
             }
         }
     }
-    
+        
     return 0;
 }
 
