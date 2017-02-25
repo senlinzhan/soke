@@ -234,8 +234,6 @@ int threadpool_add(threadpool_t *pool, void (*function)(void *), void *argument)
 }
 
 
-
-
 int threadpool_destroy(threadpool_t *pool)
 {
     int status = pthread_mutex_lock(&pool->mutex);
