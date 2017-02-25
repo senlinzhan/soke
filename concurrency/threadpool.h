@@ -19,6 +19,7 @@ typedef struct threadpool_task_t
 
 typedef struct threadpool_t
 {
+    pthread_attr_t attr;
     pthread_mutex_t mutex;
     pthread_cond_t  cond;
     pthread_cond_t quit_cond;
@@ -152,10 +153,22 @@ int threadpool_create(threadpool_t *pool, int max_threads)
     {
         return EINVAL;        
     }
-    
-    int status = pthread_mutex_init(&pool->mutex, NULL);
+
+    int status = pthread_attr_init(&pool->attr);
     if (status != 0)
     {
+        return status;
+    }
+    status = pthread_attr_setdetachstate(&pool->attr, PTHREAD_CREATE_DETACHED);
+    if (status != 0)
+    {
+        pthread_attr_destroy(&pool->attr);
+        return status;
+    }
+    status = pthread_mutex_init(&pool->mutex, NULL);
+    if (status != 0)
+    {
+        pthread_attr_destroy(&pool->attr);
         return status; 
     }
 
@@ -163,6 +176,7 @@ int threadpool_create(threadpool_t *pool, int max_threads)
     if (status != 0)
     {
         pthread_mutex_destroy(&pool->mutex);
+        pthread_attr_destroy(&pool->attr);
         return status;        
     }
 
@@ -171,6 +185,7 @@ int threadpool_create(threadpool_t *pool, int max_threads)
     {
         pthread_cond_destroy(&pool->cond);
         pthread_mutex_destroy(&pool->mutex);
+        pthread_attr_destroy(&pool->attr);
         return status;
     }
     
@@ -220,7 +235,7 @@ int threadpool_add(threadpool_t *pool, void (*function)(void *), void *argument)
     {
         // all threads are busy, we create the new one
         pthread_t thread;
-        status = pthread_create(&thread, NULL, threadpool_worker, (void*)pool);
+        status = pthread_create(&thread, &pool->attr, threadpool_worker, (void*)pool);
         if (status != 0)
         {
             pthread_mutex_unlock(&pool->mutex);
@@ -271,7 +286,7 @@ int threadpool_destroy(threadpool_t *pool)
     pthread_cond_destroy(&pool->quit_cond);
     pthread_mutex_destroy(&pool->mutex);
     pthread_cond_destroy(&pool->cond);
-    
+    pthread_attr_destroy(&pool->attr);
     return 0;
 }
 
