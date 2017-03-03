@@ -1,15 +1,14 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
-#include <vector>
-#include <queue>
-#include <thread>
+#include <condition_variable>
 #include <functional>
 #include <future>
-#include <condition_variable>
-#include <mutex>
-#include <future>
 #include <memory>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
 
 class ThreadPool
 {
@@ -81,23 +80,21 @@ public:
 
         using ReturnType = std::result_of_t<decltype(execute)()>;
         using PackagedTask = std::packaged_task<ReturnType()>;
-        // std::packaged_task<ReturnType()> task{std::move(execute)};
+        
         auto task = std::make_shared<PackagedTask>(std::move(execute)); 
-        //auto result = task.get_future();
         auto result = task->get_future();
         {
             MutexGuard guard(mutex_);
-//            tasks_.emplace([task = std::move(task)]()
-//            {
-//                task();
-//            });
-            tasks_.emplace([task](){ (*task)(); });
+            tasks_.emplace([task]()
+            {
+                (*task)();
+            });
         }        
         cv_.notify_one();
         return result;
     }
 
-    // size() is thread safe function
+    // the size of the pool will never change, so this function is thread-safe
     size_t size() const
     {
         return size_;
