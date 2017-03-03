@@ -56,7 +56,7 @@ public:
     
     size_type size() const
     {
-        std::unique_lock<mutex_type> lock( mutex_ );
+        std::lock_guard<mutex_type> lock( mutex_ );        
         return queue_.size();
     }
     
