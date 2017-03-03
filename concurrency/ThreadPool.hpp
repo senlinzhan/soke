@@ -101,12 +101,12 @@ public:
     }    
     
 private:
-    bool quit_;
-    size_t size_;
-    std::mutex mutex_;
-    std::condition_variable cv_;
+    bool                     quit_;
+    size_t                   size_;
+    std::mutex               mutex_;
+    std::condition_variable  cv_;
     std::vector<std::thread> threads_;
-    std::queue<TaskType> tasks_;
+    std::queue<TaskType>     tasks_;
 };
 
 
