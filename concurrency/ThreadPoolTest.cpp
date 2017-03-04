@@ -23,7 +23,6 @@ int main(int argc, char *argv[])
         ftu.get();
     }
     std::cout << "ending..." << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(6));
     
     return 0;
 }

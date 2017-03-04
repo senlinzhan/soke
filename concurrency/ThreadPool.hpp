@@ -1,6 +1,8 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
+#include <iostream>
+
 #include <cassert>
 #include <condition_variable>
 #include <functional>
@@ -9,7 +11,6 @@
 #include <mutex>
 #include <queue>
 #include <thread>
-#include <vector>
 #include <unordered_map>
 
 
@@ -44,15 +45,15 @@ public:
             MutexGuard guard(mutex_);
             quit_ = true;
         }
-
+        
         for (auto &elem: threads_)
         {
             if (elem.second.joinable())
             {
                 elem.second.join();
             }
-        }        
-    }    
+        }
+    }
     
     void worker()
     {
@@ -79,7 +80,6 @@ public:
                     }
                     if (hasTimedout)
                     {
-                        clearFinishedThreads();
                         --currentThreads_;
                         finishedThreadIDs_.emplace(std::this_thread::get_id());
                         return;
@@ -106,48 +106,45 @@ public:
         
         auto task = std::make_shared<PackagedTask>(std::move(execute)); 
         auto result = task->get_future();
-        {
-            MutexGuard guard(mutex_);
-            tasks_.emplace([task]()
-                           {
-                               (*task)();
-                           });
-        }
-
+        
+        MutexGuard guard(mutex_);
+        assert(!quit_);
+     
+        tasks_.emplace([task]()
+                       {
+                           (*task)();
+                       });
         if (idleThreads_ > 0)
         {
             cv_.notify_one();
         }
         else if (currentThreads_ < maxThreads_)
         {
-            MutexGuard guard(mutex_);            
             Thread t(&ThreadPool::worker, this);            
-            assert(threads_.find(t.get_id()) == threads_.end());            
+            assert(threads_.find(t.get_id()) == threads_.end());
+
             threads_.emplace(std::make_pair(t.get_id(), std::move(t)));
+
+            while (!finishedThreadIDs_.empty())
+            {
+                auto id = std::move(finishedThreadIDs_.front());
+                finishedThreadIDs_.pop();
+            
+                auto iter = threads_.find(id);
+                assert(iter != threads_.end());
+            
+                if (iter->second.joinable())
+                {
+                    iter->second.join();
+                }
+                threads_.erase(iter);
+            }                        
         }        
 
         return result;
     }
     
 private:
-    void clearFinishedThreads()
-    {
-        while (!finishedThreadIDs_.empty())
-        {
-            auto id = std::move(finishedThreadIDs_.front());
-            finishedThreadIDs_.pop();
-            
-            auto iter = threads_.find(id);
-            assert(iter != threads_.end());
-            
-            if (iter->second.joinable())
-            {
-                iter->second.join();
-            }
-            threads_.erase(iter);
-        }                        
-    }
-
     constexpr static size_t               WAIT_SECONDS = 2;
     
     bool                                  quit_;
