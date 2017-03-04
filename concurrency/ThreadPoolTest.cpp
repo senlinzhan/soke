@@ -10,9 +10,8 @@ int main(int argc, char *argv[])
 
     std::vector<std::future<void>> futures;    
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 100; ++i)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(1));        
         futures.push_back(pool.submit([]()
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -24,7 +23,7 @@ int main(int argc, char *argv[])
         ftu.get();
     }
     std::cout << "ending..." << std::endl;
-
+    std::this_thread::sleep_for(std::chrono::seconds(6));
     
     return 0;
 }
