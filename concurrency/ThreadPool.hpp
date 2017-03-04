@@ -1,6 +1,8 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
+#include <iostream>
+
 #include <condition_variable>
 #include <functional>
 #include <future>
@@ -9,27 +11,28 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <unordered_map>
+#include <cassert>
 
 class ThreadPool
 {
 public:
     using TaskType = std::function<void()>;
     using MutexGuard = std::lock_guard<std::mutex>;
-    
+
     ThreadPool()
         : ThreadPool(std::thread::hardware_concurrency())
     {        
     }
     
-    explicit ThreadPool(size_t size)
-        : quit_(false), size_(size)
-    {
-        for (size_t i = 0; i < size_; ++i)
-        {
-            threads_.emplace_back(&ThreadPool::worker, this);
-        }
+    explicit ThreadPool(size_t maxThreads)
+        : quit_(false),
+          currentThreads_(0),
+          idleThreads_(0),
+          maxThreads_(maxThreads)
+    {        
     }
-
+        
     ThreadPool(const ThreadPool &) = delete;
     ThreadPool &operator=(const ThreadPool &) = delete;
     
@@ -37,14 +40,16 @@ public:
     {
         {
             MutexGuard guard(mutex_);
-            quit_ = true;            
+            quit_ = true;
         }
-        cv_.notify_all();
-        
-        for (auto &t: threads_)
+
+        for (auto &p: threads_)
         {
-            t.join();
-        }
+            if (p.second.joinable())
+            {
+                p.second.join();
+            }
+        }        
     }
     
     void worker()
@@ -54,17 +59,43 @@ public:
             TaskType task;
             {
                 std::unique_lock<std::mutex> uniqueLock(mutex_);
-                cv_.wait(uniqueLock, [this]()
+                ++idleThreads_;
+                
+                auto isNotTimedOut = cv_.wait_for(uniqueLock, std::chrono::seconds(WAIT_SECONDS), [this]()
                 {
                     return quit_ || !tasks_.empty();
                 });
-            
-                if (quit_ && tasks_.empty())
+                
+                --idleThreads_;
+
+                if (tasks_.empty())
                 {
-                    return;
+                    // FIXME: this code not for not quit
+                    if (quit_ || !isNotTimedOut)
+                    {
+                        while (!finishThreadIDs_.empty())
+                        {
+                            auto id = std::move(finishThreadIDs_.front());
+                            finishThreadIDs_.pop();
+
+                            auto iter = threads_.find(id);
+                            assert(iter != threads_.end());
+
+                            if (iter->second.joinable())
+                            {
+                                iter->second.join();
+                            }
+                            threads_.erase(iter);
+                        }
+                        
+                        --currentThreads_;
+                        finishThreadIDs_.emplace(std::this_thread::get_id());
+                        return;
+                    }
                 }
                 task = std::move(tasks_.front());
                 tasks_.pop();
+                std::cout << "task executing..." << std::endl;
             }
             task();
         }
@@ -89,25 +120,42 @@ public:
             {
                 (*task)();
             });
+        }
+
+        if (idleThreads_ > 0)
+        {
+            cv_.notify_one();
+        }
+        else if (currentThreads_ < maxThreads_)
+        {
+            MutexGuard guard(mutex_);
+            
+            std::thread t(&ThreadPool::worker, this);
+            
+            assert(threads_.find(t.get_id()) == threads_.end());
+            
+            std::cout << "create thread: " << t.get_id() << std::endl;
+            threads_.emplace(std::make_pair(t.get_id(), std::move(t)));
         }        
-        cv_.notify_one();
+
         return result;
     }
-
-    // the size of the pool will never change, so this function is thread-safe
-    size_t size() const
-    {
-        return size_;
-    }    
     
 private:
+    constexpr static size_t  WAIT_SECONDS = 2;
+    
     bool                     quit_;
-    size_t                   size_;
+    size_t                   currentThreads_;     
+    size_t                   idleThreads_;       
+    size_t                   maxThreads_;
+
+    std::unordered_map<std::thread::id, std::thread> threads_;
+    std::queue<std::thread::id> finishThreadIDs_;
     std::mutex               mutex_;
     std::condition_variable  cv_;
-    std::vector<std::thread> threads_;
     std::queue<TaskType>     tasks_;
 };
 
+constexpr size_t ThreadPool::WAIT_SECONDS;
 
 #endif /* THREADPOOL_H */
