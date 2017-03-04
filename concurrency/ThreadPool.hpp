@@ -1,8 +1,6 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
-#include <iostream>
-
 #include <cassert>
 #include <condition_variable>
 #include <functional>
@@ -70,18 +68,12 @@ public:
                                                      return quit_ || !tasks_.empty();
                                                  });                
                 --idleThreads_;
-
                 if (tasks_.empty())
                 {
-                    if (quit_)
+                    if (quit_ || hasTimedout)
                     {
                         --currentThreads_;
-                        return;
-                    }
-                    if (hasTimedout)
-                    {
-                        --currentThreads_;
-                        finishedThreadIDs_.emplace(std::this_thread::get_id());
+                        finishedThreadIDs_.emplace(std::this_thread::get_id());                        
                         return;
                     }
                 }
@@ -122,29 +114,31 @@ public:
         {
             Thread t(&ThreadPool::worker, this);            
             assert(threads_.find(t.get_id()) == threads_.end());
-
+            joinFinishedThreads();            
             threads_.emplace(std::make_pair(t.get_id(), std::move(t)));
-
-            while (!finishedThreadIDs_.empty())
-            {
-                auto id = std::move(finishedThreadIDs_.front());
-                finishedThreadIDs_.pop();
-            
-                auto iter = threads_.find(id);
-                assert(iter != threads_.end());
-            
-                if (iter->second.joinable())
-                {
-                    iter->second.join();
-                }
-                threads_.erase(iter);
-            }                        
         }        
 
         return result;
     }
     
 private:
+    void joinFinishedThreads()
+    {
+        while (!finishedThreadIDs_.empty())
+        {
+            auto id = std::move(finishedThreadIDs_.front());
+            finishedThreadIDs_.pop();            
+            auto iter = threads_.find(id);
+            
+            assert(iter != threads_.end());
+            assert(iter->second.joinable());
+            
+            iter->second.join();
+            threads_.erase(iter);
+        }                                
+    }
+
+    
     constexpr static size_t               WAIT_SECONDS = 2;
     
     bool                                  quit_;
