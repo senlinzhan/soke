@@ -46,10 +46,8 @@ public:
         
         for (auto &elem: threads_)
         {
-            if (elem.second.joinable())
-            {
-                elem.second.join();
-            }
+            assert(elem.second.joinable());
+            elem.second.join();
         }
     }
     
