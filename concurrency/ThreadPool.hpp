@@ -43,6 +43,7 @@ public:
             MutexGuard guard(mutex_);
             quit_ = true;
         }
+        cv_.notify_all();
         
         for (auto &elem: threads_)
         {
@@ -68,9 +69,15 @@ public:
                 --idleThreads_;
                 if (tasks_.empty())
                 {
-                    if (quit_ || hasTimedout)
+                    if (quit_)
                     {
                         --currentThreads_;
+                        return;
+                    }
+                    if (hasTimedout)
+                    {
+                        --currentThreads_;
+                        joinFinishedThreads();
                         finishedThreadIDs_.emplace(std::this_thread::get_id());                        
                         return;
                     }
@@ -112,7 +119,6 @@ public:
         {
             Thread t(&ThreadPool::worker, this);            
             assert(threads_.find(t.get_id()) == threads_.end());
-            joinFinishedThreads();            
             threads_.emplace(std::make_pair(t.get_id(), std::move(t)));
         }        
 
