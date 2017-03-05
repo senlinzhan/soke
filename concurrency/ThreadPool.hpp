@@ -90,8 +90,8 @@ public:
     }
 
     template<typename Func, typename... Ts>
-    auto submit(Func func, Ts&&... params) ->
-        std::future<typename std::result_of<Func(Ts...)>::type>
+    auto submit(Func func, Ts&&... params) 
+        -> std::future<typename std::result_of<Func(Ts...)>::type>        
     {
         auto execute = [func, &params...]
                        {

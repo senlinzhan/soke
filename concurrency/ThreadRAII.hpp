@@ -19,10 +19,14 @@ public:
     
     ~ThreadRAII()
     {
-        if (thread_.joinable()) {
-            if (action_ == DtorAction::join) {
+        if (thread_.joinable())
+        {
+            if (action_ == DtorAction::join)
+            {
                 thread_.join();
-            } else {
+            }
+            else
+            {
                 thread_.detach();
             }
         }
