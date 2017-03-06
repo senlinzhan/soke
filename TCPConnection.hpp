@@ -3,6 +3,7 @@
 
 #include "IPAddress.hpp"
 
+
 class TCPConnection
 {
 public:
@@ -10,10 +11,13 @@ public:
     TCPConnection(int sockfd, IPAddress &&addr);
 
     TCPConnection(const TCPConnection &) = delete;
-    TCPConnection &operator=(const TCPConnection &) = delete;
+    TCPConnection &operator=(const TCPConnection &) = delete;   
     
     ~TCPConnection();
-
+    
+    void setNonBlock();
+    void setTCPNoDelay();
+    
     int sockfd() const;
     std::string address() const;
     
@@ -25,3 +29,4 @@ private:
 
 
 #endif /* TCPCONNECTION_H */
+o
