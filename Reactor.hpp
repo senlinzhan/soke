@@ -6,26 +6,30 @@
 #include <thread>
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 class Event;
 
 class Reactor
 {
 public:
+    using EventPtr = std::shared_ptr<Event>;
+    
     Reactor();
     ~Reactor();
 
     Reactor(const Reactor &) = delete;
     Reactor &operator=(const Reactor &) = delete;
 
-    void updateEvent(std::shared_ptr<Event> event);
+    void insertEvent(EventPtr event);
+    void deleteEvent(EventPtr event);
     
     void run();
 
 private:
     std::thread::id currentThreadId_;
     Epoll epoll_;
-    std::vector<std::shared_ptr<Event>> events_;
+    std::unordered_map<int, EventPtr> events_;
 };
 
 

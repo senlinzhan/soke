@@ -18,17 +18,18 @@ public:
     Epoll(const Epoll &) = delete;
     Epoll &operator=(const Epoll &) = delete;
 
+    void addEvent(int fd, uint32_t events, Event *ptr);
+
     void updateEvent(int fd, uint32_t events, Event *ptr);
     
     void deleteEvent(int fd);
 
-    std::vector<Event *> pollEvents();
+    std::vector<Event *> pollEvents(int timeoutMs);
     
 private:
     static constexpr int MAX_EVENTS = 64;
 
     int epfd_;
-    std::set<int> fds_;
     std::array<struct epoll_event, MAX_EVENTS> events_;
 };
 

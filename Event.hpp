@@ -3,29 +3,23 @@
 
 #include <unistd.h>
 #include <functional>
+#include <sys/epoll.h>
 
 class Event
 {
 public:
     using Callback = std::function<void()>;
     
-    Event(int fd)
-        : fd_(fd)
-    {        
-    }
+    Event(int fd, uint32_t interestedEvents);
     
-    ~Event()
-    {
-        ::close(fd_);
-    }
+    ~Event();
 
     Event(const Event &) = delete;
     Event &operator=(const Event &) = delete;
 
-    int fd() const
-    {
-        return fd_;
-    }
+    int fd() const;
+
+    void handleEvent();
     
     void doWhenRead(Callback callback)
     {
@@ -47,15 +41,23 @@ public:
         whenError_ = callback;
     }
 
-    void setReadyEvents(int readyEvents)
+    void setReadyEvents(uint32_t readyEvents)
     {
         readyEvents_ = readyEvents;
     }    
+
+    uint32_t interestedEvents() const
+    {
+        return interestedEvents_;
+    }
     
 private:
+    static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
+    static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
+    
     int fd_;        
-    int interestedEvents_;
-    int readyEvents_;
+    uint32_t interestedEvents_;
+    uint32_t readyEvents_;
     
     Callback whenRead_;
     Callback whenWrite_;
