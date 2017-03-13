@@ -7,6 +7,7 @@ class ThreadRAII
 {
 public:
     enum class DtorAction {join, detach};
+    
     template<typename... Ts>
     ThreadRAII(DtorAction a, Ts&&... params)
         : action_(a),
@@ -32,7 +33,11 @@ public:
         }
     }
 	
-    std::thread &get() { return thread_; }
+    std::thread &get()
+    {
+        return thread_;
+    }
+    
 private:
     DtorAction action_;
     std::thread thread_;
