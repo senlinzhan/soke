@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class Event;
 
@@ -30,6 +31,7 @@ private:
     std::thread::id currentThreadId_;
     Epoll epoll_;
     std::unordered_map<int, EventPtr> events_;
+    std::unordered_set<int> activeFds_;
 };
 
 
