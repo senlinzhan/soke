@@ -50,14 +50,21 @@ public:
     {
         return interestedEvents_;
     }
+
+    bool isValid() const
+    {
+        return isValid_;
+    }
     
 private:
     static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
     static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
     
-    int fd_;        
+    int      fd_;        
+    bool     isValid_;
     uint32_t interestedEvents_;
     uint32_t readyEvents_;
+
     
     Callback whenRead_;
     Callback whenWrite_;

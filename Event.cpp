@@ -6,6 +6,7 @@ constexpr uint32_t Event::WRITE_EVENT;
 
 Event::Event(int fd, uint32_t interestedEvents)
     : fd_(fd),
+      isValid_(true),
       interestedEvents_(interestedEvents),
       readyEvents_(0)
 {    

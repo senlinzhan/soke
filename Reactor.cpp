@@ -24,7 +24,9 @@ void Reactor::run()
 }
 
 void Reactor::insertEvent(EventPtr event)
-{ 
+{
+    assert(std::this_thread::get_id() == currentThreadId_);
+    
     int fd = event->fd();
     if (events_.find(fd) == events_.end())
     {
@@ -33,12 +35,21 @@ void Reactor::insertEvent(EventPtr event)
     }
     else
     {
-        epoll_.updateEvent(fd, event->interestedEvents(), event.get());
+        if (event->isValid())
+        {
+            epoll_.updateEvent(fd, event->interestedEvents(), event.get());    
+        }
+        else
+        {
+            epoll_.deleteEvent(fd);
+        }
     }
 }
  
 void Reactor::deleteEvent(EventPtr event)
 {
+    assert(std::this_thread::get_id() == currentThreadId_);
+    
     int fd = event->fd();
     assert(events_.find(fd) != events_.end());
 
