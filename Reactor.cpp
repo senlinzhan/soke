@@ -12,6 +12,27 @@ Reactor::~Reactor()
 {    
 }
 
+void Reactor::registerEvent(EventPtr event)
+{
+    assert(event != nullptr);
+
+    int fd = event->fd();
+    assert(std::this_thread::get_id() == currentThreadId_);
+    assert(events_.find(fd) == events_.end());
+    
+    events_[fd] = event;
+    if (event->isActive())
+    {
+        epoll_.addEvent(fd, event->interestedEvents(), event.get());        
+    }
+    else
+    {
+        invalidFds_.insert(fd);
+    }
+
+    event->reactor_ = this;
+}
+
 void Reactor::run()
 {
     assert(std::this_thread::get_id() == currentThreadId_);
@@ -22,46 +43,40 @@ void Reactor::run()
         event->handleEvent();
     }
 }
-
-void Reactor::insertEvent(EventPtr event)
+  
+void Reactor::updateEvent(EventPtr event)
 {
     assert(std::this_thread::get_id() == currentThreadId_);
-    
+    assert(event != nullptr);
+    assert(events_.find(event->fd()) != events_.end());    
+
     int fd = event->fd();
-    if (events_.find(fd) == events_.end())
+    if (invalidFds_.find(fd) == invalidFds_.end())
     {
-        events_[fd] = event;
+        invalidFds_.erase(fd);
         epoll_.addEvent(fd, event->interestedEvents(), event.get());
     }
     else
     {
-        if (invalidFds_.find(fd) == invalidFds_.end())
+        if (event->isActive())
         {
-            invalidFds_.erase(fd);
-            epoll_.addEvent(fd, event->interestedEvents(), event.get());
+            epoll_.updateEvent(fd, event->interestedEvents(), event.get());
         }
         else
         {
-            if (event->isActive()
-            {
-                epoll_.updateEvent(fd, event->interestedEvents(), event.get());
-            }
-            else
-            {
-                epoll_.deleteEvent(fd);
-                invalidFds_.insert(fd);
-            }
+            epoll_.deleteEvent(fd);
+            invalidFds_.insert(fd);
         }
     }
 }
- 
-void Reactor::deleteEvent(EventPtr event)
+  
+void Reactor::deregisterEvent(EventPtr event)
 {
     assert(std::this_thread::get_id() == currentThreadId_);
+    assert(event != nullptr);
+    assert(events_.find(event->fd()) != events_.end());
     
     int fd = event->fd();
-    assert(events_.find(fd) != events_.end());
-
     events_.erase(fd);
     if (invalidFds_.find(fd) != invalidFds_.end())
     {
@@ -71,4 +86,5 @@ void Reactor::deleteEvent(EventPtr event)
     {
         epoll_.deleteEvent(fd);
     }
+    event->reactor_ = nullptr;
 }

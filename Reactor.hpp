@@ -22,9 +22,10 @@ public:
     Reactor(const Reactor &) = delete;
     Reactor &operator=(const Reactor &) = delete;
 
-    void insertEvent(EventPtr event);
-    void deleteEvent(EventPtr event);
-    
+    void registerEvent(EventPtr event);
+    void deregisterEvent(EventPtr event);    
+    void updateEvent(EventPtr event);
+     
     void run();
 
 private:

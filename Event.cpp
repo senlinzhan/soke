@@ -1,27 +1,9 @@
+#include "Reactor.hpp"
 #include "Event.hpp"
-#include <unistd.h>
 
 constexpr uint32_t Event::NONE_EVENT;
 constexpr uint32_t Event::READ_EVENT;
 constexpr uint32_t Event::WRITE_EVENT;
-
-Event::Event(int fd, uint32_t interestedEvents)
-    : fd_(fd),
-      isValid_(true),
-      interestedEvents_(interestedEvents),
-      readyEvents_(0)
-{    
-}
-
-Event::~Event()
-{
-    ::close(fd_);
-}
-
-int Event::fd() const
-{
-    return fd_;
-}
 
 void Event::handleEvent()
 {
@@ -44,4 +26,48 @@ void Event::handleEvent()
     {
         whenWrite_();
     }
+}
+
+void Event::update()
+{
+    if (reactor_ != nullptr)
+    {
+        reactor_->updateEvent(shared_from_this());
+    }       
+}
+
+void Event::disableAll()
+{
+    interestedEvents_ = NONE_EVENT;
+    update();
+}
+
+void Event::activeRead()
+{
+    interestedEvents_ |= READ_EVENT;
+    update();
+}
+
+ void Event::activeWrite()
+ {
+     interestedEvents_ |= WRITE_EVENT;
+     update();
+ }
+
+
+void Event::disableRead()
+{
+    interestedEvents_ &= ~READ_EVENT;
+    update();
+}
+
+void Event::disableWrite()
+{
+    interestedEvents_ &= ~WRITE_EVENT;
+    update();
+}
+
+bool Event::isActive() const
+{
+    return interestedEvents_ != NONE_EVENT; 
 }

@@ -4,20 +4,41 @@
 #include <unistd.h>
 #include <functional>
 #include <sys/epoll.h>
+#include <memory>
 
-class Event
+class Reactor;
+
+class Event : public std::enable_shared_from_this<Event>
 {
-public:
+    friend class Reactor;
+    
+public:    
+    static constexpr uint32_t NONE_EVENT = 0;
+    static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
+    static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
+        
     using Callback = std::function<void()>;
     
-    Event(int fd, uint32_t interestedEvents);
+    Event(int fd, uint32_t interestedEvents)
+        : fd_(fd),
+          interestedEvents_(interestedEvents),
+          readyEvents_(0),
+          reactor_(nullptr)
+    {        
+    }
     
-    ~Event();
+    ~Event()
+    {
+        ::close(fd_);
+    }
 
     Event(const Event &) = delete;
     Event &operator=(const Event &) = delete;
 
-    int fd() const;
+    int fd() const
+    {
+        return fd_;
+    }
 
     void handleEvent();
     
@@ -45,32 +66,29 @@ public:
     {
         readyEvents_ = readyEvents;
     }    
-
+ 
     uint32_t interestedEvents() const
     {
         return interestedEvents_;
     }
 
-    void disable()
-    {
-        interestedEvents_ = NONE_EVENT;
-    }
+    void disableAll();
 
-    bool isActive() const
-    {
-        return interestedEvents_ != NONE_EVENT;
-    }
+    void activeRead();
+    void disableRead();
     
+    void activeWrite();
+    void disableWrite();    
+    
+    bool isActive() const;
     
 private:
-    static constexpr uint32_t NONE_EVENT = 0;
-    static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
-    static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
+    void update();
     
-    int      fd_;        
-    bool     isValid_;
-    uint32_t interestedEvents_;
-    uint32_t readyEvents_;
+    int       fd_;
+    uint32_t  interestedEvents_;
+    uint32_t  readyEvents_;
+    Reactor  *reactor_;
     
     Callback whenRead_;
     Callback whenWrite_;
