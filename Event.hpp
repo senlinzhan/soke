@@ -51,12 +51,19 @@ public:
         return interestedEvents_;
     }
 
-    bool isValid() const
+    void disable()
     {
-        return isValid_;
+        interestedEvents_ = NONE_EVENT;
+    }
+
+    bool isActive() const
+    {
+        return interestedEvents_ != NONE_EVENT;
     }
     
+    
 private:
+    static constexpr uint32_t NONE_EVENT = 0;
     static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
     static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
     
@@ -64,7 +71,6 @@ private:
     bool     isValid_;
     uint32_t interestedEvents_;
     uint32_t readyEvents_;
-
     
     Callback whenRead_;
     Callback whenWrite_;

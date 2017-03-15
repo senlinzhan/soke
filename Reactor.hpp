@@ -31,7 +31,7 @@ private:
     std::thread::id currentThreadId_;
     Epoll epoll_;
     std::unordered_map<int, EventPtr> events_;
-    std::unordered_set<int> activeFds_;
+    std::unordered_set<int> invalidFds_;
 };
 
 

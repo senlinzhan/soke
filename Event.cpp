@@ -1,6 +1,7 @@
 #include "Event.hpp"
 #include <unistd.h>
 
+constexpr uint32_t Event::NONE_EVENT;
 constexpr uint32_t Event::READ_EVENT;
 constexpr uint32_t Event::WRITE_EVENT;
 

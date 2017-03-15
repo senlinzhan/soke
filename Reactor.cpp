@@ -31,28 +31,27 @@ void Reactor::insertEvent(EventPtr event)
     if (events_.find(fd) == events_.end())
     {
         events_[fd] = event;
-        activeFds_.insert(fd);
         epoll_.addEvent(fd, event->interestedEvents(), event.get());
     }
     else
     {
-        if (activeFds_.find(fd) == activeFds_.end())
+        if (invalidFds_.find(fd) == invalidFds_.end())
         {
-            activeFds_.insert(fd);
+            invalidFds_.erase(fd);
             epoll_.addEvent(fd, event->interestedEvents(), event.get());
         }
         else
         {
-            if (event->isValid())
+            if (event->isActive()
             {
                 epoll_.updateEvent(fd, event->interestedEvents(), event.get());
             }
             else
             {
-                activeFds_.erase(fd);
                 epoll_.deleteEvent(fd);
+                invalidFds_.insert(fd);
             }
-        }        
+        }
     }
 }
  
@@ -64,6 +63,12 @@ void Reactor::deleteEvent(EventPtr event)
     assert(events_.find(fd) != events_.end());
 
     events_.erase(fd);
-    activeFds_.erase(fd);    
-    epoll_.deleteEvent(fd);
+    if (invalidFds_.find(fd) != invalidFds_.end())
+    {
+        invalidFds_.erase(fd);
+    }
+    else
+    {
+        epoll_.deleteEvent(fd);
+    }
 }
