@@ -38,33 +38,48 @@ void Event::update()
 
 void Event::disableAll()
 {
-    interestedEvents_ = NONE_EVENT;
-    update();
+    if (interestedEvents_ != NONE_EVENT)
+    {
+        interestedEvents_ = NONE_EVENT;
+        update();
+    }
 }
 
 void Event::activeRead()
 {
-    interestedEvents_ |= READ_EVENT;
-    update();
+    if (interestedEvents_ != (interestedEvents_ | READ_EVENT))
+    {
+        interestedEvents_ |= READ_EVENT;
+        update();
+    }
 }
 
  void Event::activeWrite()
  {
-     interestedEvents_ |= WRITE_EVENT;
-     update();
+     if (interestedEvents_ != (interestedEvents_ | WRITE_EVENT))
+     {
+         interestedEvents_ |= WRITE_EVENT;
+         update();
+     }
  }
 
 
 void Event::disableRead()
 {
-    interestedEvents_ &= ~READ_EVENT;
-    update();
+    if (interestedEvents_ != (interestedEvents_ & ~READ_EVENT))
+    {
+        interestedEvents_ &= ~READ_EVENT;
+        update();
+    }
 }
 
 void Event::disableWrite()
 {
-    interestedEvents_ &= ~WRITE_EVENT;
-    update();
+    if (interestedEvents_ != (interestedEvents_ & ~WRITE_EVENT))
+    {
+        interestedEvents_ &= ~WRITE_EVENT;
+        update();
+    }
 }
 
 bool Event::isActive() const
