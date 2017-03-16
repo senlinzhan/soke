@@ -11,7 +11,6 @@
 #include <thread>
 #include <unordered_map>
 
-
 class ThreadPool
 {
 public:
@@ -52,43 +51,6 @@ public:
         }
     }
     
-    void worker()
-    {
-        while (true)
-        {
-            Task task;
-            {
-                UniqueLock uniqueLock(mutex_);
-                ++idleThreads_;                
-                auto hasTimedout = !cv_.wait_for(uniqueLock,
-                                                 std::chrono::seconds(WAIT_SECONDS),
-                                                 [this]()
-                                                 {
-                                                     return quit_ || !tasks_.empty();
-                                                 });                
-                --idleThreads_;
-                if (tasks_.empty())
-                {
-                    if (quit_)
-                    {
-                        --currentThreads_;
-                        return;
-                    }
-                    if (hasTimedout)
-                    {
-                        --currentThreads_;
-                        joinFinishedThreads();
-                        finishedThreadIDs_.emplace(std::this_thread::get_id());                        
-                        return;
-                    }
-                }
-                task = std::move(tasks_.front());
-                tasks_.pop();
-            }
-            task();
-        }
-    }
-
     template<typename Func, typename... Ts>
     auto submit(Func func, Ts&&... params) 
         -> std::future<typename std::result_of<Func(Ts...)>::type>        
@@ -126,6 +88,43 @@ public:
     }
     
 private:
+    void worker()
+    {
+        while (true)
+        {
+            Task task;
+            {
+                UniqueLock uniqueLock(mutex_);
+                ++idleThreads_;                
+                auto hasTimedout = !cv_.wait_for(uniqueLock,
+                                                 std::chrono::seconds(WAIT_SECONDS),
+                                                 [this]()
+                                                 {
+                                                     return quit_ || !tasks_.empty();
+                                                 });                
+                --idleThreads_;
+                if (tasks_.empty())
+                {
+                    if (quit_)
+                    {
+                        --currentThreads_;
+                        return;
+                    }
+                    if (hasTimedout)
+                    {
+                        --currentThreads_;
+                        joinFinishedThreads();
+                        finishedThreadIDs_.emplace(std::this_thread::get_id());                        
+                        return;
+                    }
+                }
+                task = std::move(tasks_.front());
+                tasks_.pop();
+            }
+            task();
+        }
+    }
+
     void joinFinishedThreads()
     {
         while (!finishedThreadIDs_.empty())
@@ -141,7 +140,6 @@ private:
             threads_.erase(iter);
         }                                
     }
-
     
     constexpr static size_t               WAIT_SECONDS = 2;
     
