@@ -1,5 +1,6 @@
 #include "IPAddress.hpp"
 
+#include <glog/logging.h>
 #include <utility>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -103,7 +104,7 @@ std::string IPAddress::IPAddr() const
     return host_;    
 }
 
-unsigned short IPAddress::port() const
+uint16_t IPAddress::port() const
 {
     return port_;
 }

@@ -16,7 +16,7 @@ public:
     bool isIPv6() const;    
 
     std::string IPAddr() const;
-    unsigned short port() const;
+    uint16_t port() const;
 
     std::string toString() const;    
 
