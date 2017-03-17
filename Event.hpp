@@ -11,16 +11,12 @@ class Reactor;
 class Event: public std::enable_shared_from_this<Event>
 {
     friend class Reactor;    
-public:    
-    static constexpr uint32_t NONE_EVENT = 0;
-    static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
-    static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
-        
+public:            
     using Callback = std::function<void()>;
     
-    static std::shared_ptr<Event> create(int fd, uint32_t interestedEvents)
+    static std::shared_ptr<Event> create(int fd)
     {
-        return std::make_shared<Event>(fd, interestedEvents);
+        return std::make_shared<Event>(fd);
     }
     
     ~Event()
@@ -79,9 +75,13 @@ public:
     bool isActive() const;
     
 private:
-    Event(int fd, uint32_t interestedEvents)
+    static constexpr uint32_t NONE_EVENT = 0;
+    static constexpr uint32_t READ_EVENT = EPOLLIN | EPOLLPRI;
+    static constexpr uint32_t WRITE_EVENT = EPOLLOUT;
+
+    Event(int fd)
         : fd_(fd),
-          interestedEvents_(interestedEvents),
+          interestedEvents_(NONE_EVENT),
           readyEvents_(0),
           reactor_(nullptr)
     {        
@@ -100,7 +100,5 @@ private:
     Callback whenError_;
 
 };
-
-
 
 #endif /* EVENT_H */

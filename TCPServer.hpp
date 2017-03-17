@@ -4,9 +4,76 @@
 #include "IPAddress.hpp"
 #include "TCPConnection.hpp"
 
+#include "Reactor.hpp"
+#include "Socket.hpp"
+#include "Event.hpp"
+
+#include <assert.h>
 #include <memory>
 #include <string>
 #include <string.h>
+
+class TCPServer
+{
+public:
+    using NewConnectionCallback = std::function<void (int, const IPAddress &)>;
+    
+    TCPServer(Reactor *reactor, const std::string host, uint16_t port)
+        : reactor_(reactor),
+          socket_(host, port)
+    {
+        assert(reactor_ != nullptr);
+         
+        event_ = Event::create(socket_.fd());
+        event_->activeRead();
+        event_->doWhenRead([this] ()
+                           {
+                               auto sock = socket_.accept();
+                               if (sock.isValid())
+                               {
+                                   if (connectionCallback_)
+                                   {
+                                       connectionCallback_(sock.fd(), sock.addr());
+                                   }
+                                   else
+                                   {
+                                       sock.close();
+                                   }
+                               }
+                           });
+        
+        reactor_->registerEvent(event_);        
+    }
+
+    void setNewConnectionCallback(NewConnectionCallback callback)
+    {
+        connectionCallback_ = callback;
+    }
+    
+    
+    ~TCPServer()
+    {        
+    }
+
+private:
+    Reactor *reactor_;
+    std::shared_ptr<Event> event_;
+    ServerSocket socket_;
+
+    NewConnectionCallback connectionCallback_;
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 class TCPServer
 {
