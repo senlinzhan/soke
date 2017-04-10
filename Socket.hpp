@@ -159,10 +159,16 @@ public:
     }
     
 private:
-    int setSocketReuseAddr(int fd)
+    int setTCPNoDelay()
     {
         int on = 1;
-        return ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        return ::setsockopt(fd_, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
+    }
+
+    int setSocketReuseAddr()
+    {
+        int on = 1;
+        return ::setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
     }
     
     static constexpr int BACKLOG = 128;
