@@ -21,7 +21,6 @@ public:
     
     ~Event()
     {
-        ::close(fd_);
     }
 
     Event(const Event &) = delete;

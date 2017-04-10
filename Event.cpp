@@ -32,7 +32,14 @@ void Event::update()
 {
     if (reactor_ != nullptr)
     {
-        reactor_->updateEvent(shared_from_this());
+        if (!reactor_->hasRegisterEvent(shared_from_this()))
+        {
+            reactor_->registerEvent(shared_from_this());
+        }
+        else
+        {
+            reactor_->updateEvent(shared_from_this());            
+        }
     }       
 }
 

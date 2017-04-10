@@ -128,7 +128,6 @@ public:
         ::close(fd_);
     }
 
-
     ServerSocket(ServerSocket &&) = default;
     ServerSocket &operator=(ServerSocket &&) = default;
     
@@ -157,14 +156,13 @@ public:
                                &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
         return Socket(sockfd, IPAddress(addr));
     }
-    
-private:
+
     int setTCPNoDelay()
     {
         int on = 1;
         return ::setsockopt(fd_, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
     }
-
+private:
     int setSocketReuseAddr()
     {
         int on = 1;

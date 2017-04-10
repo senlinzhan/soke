@@ -25,16 +25,20 @@ public:
     void registerEvent(EventPtr event);
     void deregisterEvent(EventPtr event);    
     void updateEvent(EventPtr event);
-     
+    bool hasRegisterEvent(EventPtr event);
+    
     void run();
-
+    void quit();    
 private:
+    bool quit_;
     std::thread::id currentThreadId_;
+
+    int wakeup_fd_;
+    EventPtr wakeupEvent_;
+    
     Epoll epoll_;
     std::unordered_map<int, EventPtr> events_;
     std::unordered_set<int> invalidFds_;
 };
-
-
 
 #endif /* REACTOR_H */
