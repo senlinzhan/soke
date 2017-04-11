@@ -15,7 +15,7 @@ EventLoop::EventLoop()
 {
     if (t_loopInThisThread != nullptr)
     {
-        LOG(FATAL) << "This thread already has a EventLoop";
+        LOG(FATAL) << "This thread already has an EventLoop";
     }
     else
     {

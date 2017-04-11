@@ -35,6 +35,24 @@ void Channel::enableReading()
     loop_->updateChannel(this);
 }
 
+void Channel::enableWriting()
+{
+    events_ |= kWriteEvent;
+    loop_->updateChannel(this);
+}
+
+void Channel::disableAll()
+{
+    events_ = kNoneEvent;
+    loop_->updateChannel(this);
+}
+
+void Channel::disableWriting()
+{
+    events_ &= ~kWriteEvent;
+    loop_->updateChannel(this);
+}
+
 void Channel::setReadCallback(EventCallback callback)
 {
     readCallback_ = callback;

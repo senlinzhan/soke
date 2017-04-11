@@ -28,7 +28,11 @@ namespace soke
         EventLoop *ownerLoop() const;
 
         void enableReading();
+        void enableWriting();
 
+        void disableWriting();
+        void disableAll();
+        
         int fd() const;
 
         bool isNoneEvent() const;
