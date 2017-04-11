@@ -1,0 +1,1 @@
+clang++ -g -Wall -std=c++11 -o main main.cpp EventLoop.cpp Channel.cpp Epoll.cpp -lglog -lpthread
