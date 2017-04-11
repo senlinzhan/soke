@@ -1,10 +1,8 @@
 #include "EventLoop.hpp"
-
 #include "Channel.hpp"
 
 #include <assert.h>
 #include <glog/logging.h>
-#include <poll.h>
 
 using namespace soke;
 
@@ -112,7 +110,6 @@ void EventLoop::removeChannel(Channel *channel)
         epoll_.deleteEvent(fd);
     }
 }
-
 
 void EventLoop::quit()
 {
