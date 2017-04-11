@@ -2,11 +2,9 @@
 #define EPOLL_H
 
 #include <sys/epoll.h>
-
 #include <array>
 #include <vector>
 #include <set>
-
 
 namespace soke
 {
@@ -35,7 +33,6 @@ namespace soke
         int epfd_;
         std::array<struct epoll_event, MAX_EVENTS> events_;
     };
-
 }
 
 #endif /* EPOLL_H */

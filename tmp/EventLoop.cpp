@@ -37,12 +37,16 @@ void EventLoop::loop()
     assert(std::this_thread::get_id() == tid_);
 
     looping_ = true;
-    auto readyEvents = epoll_.pollEvents(1000);
-    for (auto event: readyEvents)
+    quit_ = false;
+
+    while (!quit_)
     {
-        event->handleEvent();
-    }
-    
+        auto readyEvents = epoll_.pollEvents(1000);
+        for (auto event: readyEvents)
+        {
+            event->handleEvent();
+        }        
+    }    
     looping_ = false;
 }
 
@@ -88,8 +92,7 @@ void EventLoop::updateChannel(Channel *channel)
                 epoll_.updateEvent(fd, channel->events(), channel);
             }
         }
-    }
-    
+    }    
 }
 
 void EventLoop::removeChannel(Channel *channel)
@@ -108,5 +111,10 @@ void EventLoop::removeChannel(Channel *channel)
     {
         epoll_.deleteEvent(fd);
     }
+}
 
+
+void EventLoop::quit()
+{
+    quit_ = true;
 }

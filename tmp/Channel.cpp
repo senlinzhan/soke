@@ -55,7 +55,6 @@ int Channel::fd() const
     return fd_;
 }
 
-
 bool Channel::isNoneEvent() const
 {
     return events_ == kNoneEvent;
@@ -65,7 +64,6 @@ int Channel::events() const
 {
     return events_;
 }
-
 
 void Channel::handleEvent()
 {        
