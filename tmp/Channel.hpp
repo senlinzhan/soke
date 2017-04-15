@@ -45,16 +45,14 @@ namespace soke
         static const int kReadEvent;
         static const int kWriteEvent;
         
-        EventLoop *loop_;
-        const int fd_;
-
-        int events_;
-        int revents_;
-
-        EventCallback readCallback_;
-        EventCallback writeCallback_;
-        EventCallback errorCallback_;
-        EventCallback closeCallback_;
+        EventLoop       *loop_;
+        const int        fd_;
+        int              events_;
+        int              revents_;
+        EventCallback    readCallback_;
+        EventCallback    writeCallback_;
+        EventCallback    errorCallback_;
+        EventCallback    closeCallback_;
     };    
 };
 
