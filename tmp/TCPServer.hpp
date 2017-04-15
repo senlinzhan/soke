@@ -29,9 +29,9 @@ namespace soke
         void setMessageCallback(MessageCallback callback);
         void start();
         
-    private:
+    private: 
         //void newConnection(int sockfd, const IPAddress &addr);
-        void newConnection(std::shared_ptr<Socket> socket);
+        void newConnection(std::unique_ptr<Socket> socket);
         
         EventLoop *loop_;
         Acceptor   acceptor_;

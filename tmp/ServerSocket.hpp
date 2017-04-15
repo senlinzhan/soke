@@ -27,7 +27,7 @@ namespace soke
         
         void shutdownWrite();
         
-        std::shared_ptr<Socket> accept();
+        std::unique_ptr<Socket> accept();
         
         // set TCP_NODELAY socket option
         int setTCPNoDelay();

@@ -15,7 +15,7 @@ namespace soke
     class Acceptor
     {
     public:
-        using SocketPtr = std::shared_ptr<Socket>;
+        using SocketPtr = std::unique_ptr<Socket>;
         using NewConnectionCallback = std::function<void (SocketPtr)>;
         
         Acceptor(EventLoop *loop, const IPAddress &addr);

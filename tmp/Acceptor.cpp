@@ -26,13 +26,13 @@ void Acceptor::setNewConnectionCallback(NewConnectionCallback callback)
 }
 
 void Acceptor::handleRead()
-{
+{ 
     auto clientSock = serverSocket_.accept();
     if (clientSock != nullptr)
     {
         if (newConncallback_) 
         {    
-            newConncallback_(clientSock);
+            newConncallback_(std::move(clientSock));
         }
     }
 }

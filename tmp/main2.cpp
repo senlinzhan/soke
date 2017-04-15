@@ -11,8 +11,9 @@ void onConnection(soke::TCPConnectionPtr conn)
 }
 
 void onMessage(soke::TCPConnectionPtr, const char *data, ssize_t len)
-{    
-    std::cout << "onMessage():" << std::endl;
+{
+    std::string message(data, len);
+    std::cout << "onMessage():" << message << std::endl;
 }
 
 int main(int argc, char *argv[])

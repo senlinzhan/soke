@@ -8,13 +8,13 @@
 #include <memory>
 
 namespace soke
-{
+{ 
     class EventLoop;
     
     class TCPConnection : public std::enable_shared_from_this<TCPConnection>
     {
     public:
-        TCPConnection(EventLoop *loop, std::shared_ptr<Socket> socket);
+        TCPConnection(EventLoop *loop, std::unique_ptr<Socket> socket);
         ~TCPConnection();
 
         // disable the copy operations
@@ -29,7 +29,7 @@ namespace soke
         
     private:
         EventLoop               *loop_;
-        std::shared_ptr<Socket>  socket_;
+        std::unique_ptr<Socket>  socket_;
         Channel                  channel_;
         ConnectionCallback       connectionCallback_;
         MessageCallback          messageCallback_;

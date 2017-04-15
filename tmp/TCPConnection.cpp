@@ -1,18 +1,20 @@
 #include "EventLoop.hpp"
 #include "TCPConnection.hpp"
 #include <unistd.h>
- 
+#include <glog/logging.h>
+
 using namespace soke;
 
-TCPConnection::TCPConnection(EventLoop *loop, std::shared_ptr<Socket> socket)
+TCPConnection::TCPConnection(EventLoop *loop, std::unique_ptr<Socket> socket)
     : loop_(loop), 
-      socket_(socket),
-      channel_(loop_, socket->fd())      
+      socket_(std::move(socket)),
+      channel_(loop_, socket_->fd())      
 {
     channel_.setReadCallback([this] ()
                              {
                                  char buf[65535];
                                  ssize_t n = ::read(channel_.fd(), buf, sizeof(buf));
+                                 LOG(INFO) << "n = " << n << "\n";
                                  if (messageCallback_)
                                  {
                                      messageCallback_(shared_from_this(), buf, n);
@@ -22,7 +24,7 @@ TCPConnection::TCPConnection(EventLoop *loop, std::shared_ptr<Socket> socket)
 
 TCPConnection::~TCPConnection()
 {  
-    loop_->removeChannel(&channel_);
+    // loop_->removeChannel(&channel_);
 }
 
 void TCPConnection::setConnectionCallback(ConnectionCallback callback)

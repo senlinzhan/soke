@@ -98,7 +98,7 @@ int ServerSocket::setSocketReuseAddr(int sockfd)
     return ::setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 }
 
-std::shared_ptr<Socket> ServerSocket::accept()
+std::unique_ptr<Socket> ServerSocket::accept()
 {         
     sockaddr_storage addr;
     socklen_t len = sizeof(addr);        
@@ -110,7 +110,7 @@ std::shared_ptr<Socket> ServerSocket::accept()
         LOG(ERROR) << "accept connection failed";
         return nullptr;
     }
-    return std::make_shared<Socket>(sockfd, IPAddress(addr));
+    return std::unique_ptr<Socket>(new Socket(sockfd, IPAddress(addr)));
 }
 
 void ServerSocket::shutdownWrite()
