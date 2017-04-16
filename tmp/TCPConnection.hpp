@@ -12,12 +12,14 @@
 namespace soke
 { 
     class EventLoop;
+    class TCPServer;
     
     class TCPConnection : public std::enable_shared_from_this<TCPConnection>
     {
     public:
         // for internal use, user should not use this function directly
-        TCPConnection(EventLoop *loop, std::unique_ptr<Socket> socket, const std::string &name);
+        TCPConnection(EventLoop *loop, TCPServer *server,
+                      std::unique_ptr<Socket> socket, const std::string &name);
 
         // create TCPConnectionPtr
         template <typename... Args>
@@ -35,12 +37,16 @@ namespace soke
         void setConnectionCallback(ConnectionCallback callback);
         void setMessageCallback(MessageCallback callback);
         void connectEstablished();
-
+        void connectDesytoyed();
+        
         const IPAddress &addr() const;
         const std::string &name() const;
         
     private:
+        void handleRead();
+        
         EventLoop               *loop_;
+        TCPServer               *server_;
         std::unique_ptr<Socket>  socket_;
         std::string              name_;
         Channel                  channel_;

@@ -43,8 +43,15 @@ void EventLoop::loop()
         for (auto event: readyEvents)
         {
             event->handleEvent();
+        }
+        while (!taskQueue_.empty())
+        {
+            auto task = taskQueue_.front();
+            taskQueue_.pop();
+            task();
         }        
-    }    
+    }
+    
     looping_ = false;
 }
 
@@ -114,4 +121,10 @@ void EventLoop::removeChannel(Channel *channel)
 void EventLoop::quit()
 {
     quit_ = true;
+}
+
+
+void EventLoop::queueInLoop(Task task)
+{
+    taskQueue_.push(std::move(task));
 }

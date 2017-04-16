@@ -90,7 +90,7 @@ void Channel::handleEvent()
     {
         closeCallback_();
     }
-
+    
     if ((revents_ & EPOLLERR) && errorCallback_)
     {
         errorCallback_();

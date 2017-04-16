@@ -29,6 +29,8 @@ namespace soke
         void setMessageCallback(MessageCallback callback);
         void start();
         
+        void removeConnection(TCPConnectionPtr conn);
+        
     private: 
         //void newConnection(int sockfd, const IPAddress &addr);
         void newConnection(std::unique_ptr<Socket> socket);

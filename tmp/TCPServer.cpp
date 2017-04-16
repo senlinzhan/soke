@@ -1,5 +1,8 @@
+#include "EventLoop.hpp"
 #include "TCPServer.hpp"
 #include "TCPConnection.hpp" 
+
+#include <assert.h>
 #include <glog/logging.h>
 
 using namespace soke;
@@ -27,15 +30,25 @@ void TCPServer::setMessageCallback(MessageCallback callback)
   
 void TCPServer::newConnection(std::unique_ptr<Socket> sock)
 {
-    auto name = std::to_string(nextConnID++);
-    
-    //auto connectionPtr = std::make_shared<TCPConnection>(loop_,
-    //std::move(sock), name);
-    auto connectionPtr = TCPConnection::create(loop_, std::move(sock), name);
+    auto name = std::to_string(nextConnID++);   
+    auto connectionPtr = TCPConnection::create(loop_, this, std::move(sock), name);
     connections_[name] = connectionPtr;    
     connectionPtr->setConnectionCallback(connectionCallback_);
     connectionPtr->setMessageCallback(messageCallback_);
     connectionPtr->connectEstablished();   
+}
+
+void TCPServer::removeConnection(TCPConnectionPtr conn)
+{
+    assert(conn != nullptr);
+    LOG(INFO) << "TCPServer::removeConnection - remove connection-" << conn->name();    
+    assert(connections_.find(conn->name()) != connections_.end());
+    connections_.erase(conn->name());
+
+    loop_->queueInLoop([conn] ()
+                       {
+                           conn->connectDesytoyed();
+                       });
 }
 
 void TCPServer::start()
