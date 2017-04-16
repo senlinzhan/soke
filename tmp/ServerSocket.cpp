@@ -85,12 +85,6 @@ int ServerSocket::fd() const
 {
     return fd_;
 }
-
-int ServerSocket::setTCPNoDelay()
-{
-    int on = 1;
-    return ::setsockopt(fd_, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
-}
  
 int ServerSocket::setSocketReuseAddr(int sockfd)
 {
@@ -119,5 +113,35 @@ void ServerSocket::shutdownWrite()
     {
         LOG(ERROR) << "ServerSocket::shutdownWrite() - error: "
                    << ::strerror(errno); 
+    }
+}
+
+void ServerSocket::setTCPNoDelay()
+{ 
+    int state = 1;
+    if (::setsockopt(fd_, IPPROTO_TCP, TCP_NODELAY, &state, sizeof(state)) == -1)
+    {
+        LOG(ERROR) << "ServerSocket::setTCPNoDelay() - error: "
+                   << ::strerror(errno);                
+    }
+}
+
+void ServerSocket::setTCPCork()
+{
+    int state = 1;
+    if (setsockopt(fd_, IPPROTO_TCP, TCP_CORK, &state, sizeof(state)) == -1)
+    {       
+        LOG(ERROR) << "ServerSocket::setTCPCork() - error: "
+                   << ::strerror(errno);        
+    }
+}
+
+void ServerSocket::unsetTCPCork()
+{
+    int state = 0;
+    if (setsockopt(fd_, IPPROTO_TCP, TCP_CORK, &state, sizeof(state)) == -1)
+    {
+        LOG(ERROR) << "ServerSocket::unsetTCPCork() - error: "
+                   << ::strerror(errno);        
     }
 }

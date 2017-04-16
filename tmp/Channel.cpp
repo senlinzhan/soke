@@ -1,5 +1,6 @@
 #include "EventLoop.hpp"
 #include "Channel.hpp"
+#include <glog/logging.h>
 
 using namespace soke;
 
@@ -84,7 +85,7 @@ int Channel::events() const
 }
 
 void Channel::handleEvent()
-{        
+{
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN) && closeCallback_)
     {
         closeCallback_();

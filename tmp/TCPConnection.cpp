@@ -14,7 +14,6 @@ TCPConnection::TCPConnection(EventLoop *loop, std::unique_ptr<Socket> socket)
                              {
                                  char buf[65535];
                                  ssize_t n = ::read(channel_.fd(), buf, sizeof(buf));
-                                 LOG(INFO) << "n = " << n << "\n";
                                  if (messageCallback_)
                                  {
                                      messageCallback_(shared_from_this(), buf, n);

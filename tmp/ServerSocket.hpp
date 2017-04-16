@@ -30,7 +30,13 @@ namespace soke
         std::unique_ptr<Socket> accept();
         
         // set TCP_NODELAY socket option
-        int setTCPNoDelay();
+        void setTCPNoDelay();
+
+        // set TCP_CORK socket option
+        void setTCPCork();
+
+        // unset TCP_CORK socket option
+        void unsetTCPCork();
     private:
         int setSocketReuseAddr(int sockfd);
         
