@@ -6,7 +6,8 @@
 
 namespace soke
 {        
-    class Socket;    
+    class Socket;
+    
     class ServerSocket
     {
     public:

@@ -27,10 +27,12 @@ void TCPServer::setMessageCallback(MessageCallback callback)
   
 void TCPServer::newConnection(std::unique_ptr<Socket> sock)
 {
-    auto connectionName = std::to_string(nextConnID++);
-    auto connectionPtr = std::make_shared<TCPConnection>(loop_, std::move(sock));
-    connections_[connectionName] = connectionPtr;
+    auto name = std::to_string(nextConnID++);
     
+    //auto connectionPtr = std::make_shared<TCPConnection>(loop_,
+    //std::move(sock), name);
+    auto connectionPtr = TCPConnection::create(loop_, std::move(sock), name);
+    connections_[name] = connectionPtr;    
     connectionPtr->setConnectionCallback(connectionCallback_);
     connectionPtr->setMessageCallback(messageCallback_);
     connectionPtr->connectEstablished();   
@@ -40,4 +42,3 @@ void TCPServer::start()
 {
     acceptor_.listen();
 }
- 

@@ -5,9 +5,10 @@
 
 using namespace soke;
 
-TCPConnection::TCPConnection(EventLoop *loop, std::unique_ptr<Socket> socket)
+TCPConnection::TCPConnection(EventLoop *loop, std::unique_ptr<Socket> socket, const std::string &name) 
     : loop_(loop), 
       socket_(std::move(socket)),
+      name_(name),
       channel_(loop_, socket_->fd())      
 {
     channel_.setReadCallback([this] ()
@@ -48,4 +49,9 @@ void TCPConnection::connectEstablished()
 const IPAddress &TCPConnection::addr() const
 { 
     return socket_->addr();
+}
+
+const std::string &TCPConnection::name() const
+{
+    return name_;
 }

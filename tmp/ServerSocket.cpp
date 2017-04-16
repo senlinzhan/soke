@@ -129,7 +129,7 @@ void ServerSocket::setTCPNoDelay()
 void ServerSocket::setTCPCork()
 {
     int state = 1;
-    if (setsockopt(fd_, IPPROTO_TCP, TCP_CORK, &state, sizeof(state)) == -1)
+    if (::setsockopt(fd_, IPPROTO_TCP, TCP_CORK, &state, sizeof(state)) == -1)
     {       
         LOG(ERROR) << "ServerSocket::setTCPCork() - error: "
                    << ::strerror(errno);        
@@ -139,7 +139,7 @@ void ServerSocket::setTCPCork()
 void ServerSocket::unsetTCPCork()
 {
     int state = 0;
-    if (setsockopt(fd_, IPPROTO_TCP, TCP_CORK, &state, sizeof(state)) == -1)
+    if (::setsockopt(fd_, IPPROTO_TCP, TCP_CORK, &state, sizeof(state)) == -1)
     {
         LOG(ERROR) << "ServerSocket::unsetTCPCork() - error: "
                    << ::strerror(errno);        
