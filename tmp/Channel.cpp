@@ -106,3 +106,8 @@ void Channel::handleEvent()
         writeCallback_();
     }
 }
+
+bool Channel::isWriting() const
+{
+    return events_ & kWriteEvent;
+}

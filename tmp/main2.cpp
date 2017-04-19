@@ -3,6 +3,7 @@
 #include "IPAddress.hpp"
 #include "EventLoop.hpp"
 #include "TCPServer.hpp"
+#include "TCPConnection.hpp"
 #include <unistd.h>
 #include <iostream>
 
@@ -11,9 +12,11 @@ void onConnection(soke::TCPConnectionPtr conn)
     std::cout << "onConnection(): connection from " << std::endl;
 }
 
-void onMessage(soke::TCPConnectionPtr, soke::Buffer *buff)
+void onMessage(soke::TCPConnectionPtr conn, soke::Buffer *buff)
 {
-    std::cout << "onMessage(): " << buff->retrieveAsString();
+    auto msg = buff->retrieveAsString();
+    std::cout << "onMessage(): " << msg;
+    conn->send(msg);
 }
 
 int main(int argc, char *argv[])

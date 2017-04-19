@@ -42,7 +42,9 @@ namespace soke
         
         const IPAddress &addr() const;
         const std::string &name() const;
-        
+
+        void send(const std::string &message);
+        void handleWrite();
     private:
         void handleRead();
         
@@ -54,6 +56,7 @@ namespace soke
         ConnectionCallback       connectionCallback_;
         MessageCallback          messageCallback_;
         Buffer                   inputBuffer_;
+        Buffer                   outputBuffer_;
     };    
 };
 

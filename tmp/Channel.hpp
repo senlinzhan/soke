@@ -29,7 +29,7 @@ namespace soke
 
         void enableReading();
         void enableWriting();
-
+        
         void disableWriting();
         void disableAll();
         
@@ -39,7 +39,8 @@ namespace soke
         int events() const;
 
         void handleEvent();
-        
+
+        bool isWriting() const;
     private:
         static const int kNoneEvent;
         static const int kReadEvent;

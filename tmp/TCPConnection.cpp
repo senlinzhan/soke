@@ -19,6 +19,10 @@ TCPConnection::TCPConnection(EventLoop *loop, TCPServer *server,
                              {
                                  handleRead();
                              });
+    channel_.setWriteCallback([this] ()
+                              {
+                                  handleWrite();
+                              });
 } 
 
 void TCPConnection::handleRead()
@@ -78,3 +82,50 @@ const std::string &TCPConnection::name() const
 {
     return name_;
 }
+
+void TCPConnection::send(const std::string &message)
+{
+    ssize_t nwrote = 0;
+    if (!channel_.isWriting() && outputBuffer_.readableBytes() == 0)
+    {
+        nwrote = ::write(channel_.fd(), message.data(), message.size());
+        if (nwrote < 0)
+        {
+            nwrote = 0;
+            if (errno != EWOULDBLOCK)
+            {
+                LOG(ERROR) << "TCPConnection::send";
+            }
+        }
+
+        if (nwrote < message.size())
+        {
+            outputBuffer_.append(message.data() + nwrote, message.size() - nwrote);
+            if (!channel_.isWriting())
+            {
+                channel_.enableReading();
+            }
+        }
+    }
+}
+
+void TCPConnection::handleWrite()
+{
+    if (channel_.isWriting())
+    {
+        ssize_t n = ::write(channel_.fd(), outputBuffer_.peek(), outputBuffer_.readableBytes());
+        if (n > 0)
+        {
+            outputBuffer_.retrieve(n);
+            if (outputBuffer_.readableBytes() == 0)
+            {
+                channel_.disableWriting();
+            }
+        }
+        else
+        {
+            LOG(ERROR) << "TCPConnection::handleWrite() - error: " << strerror(errno);
+        }
+    }
+}
+
