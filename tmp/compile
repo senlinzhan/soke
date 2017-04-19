@@ -1,1 +1,1 @@
-clang++ -g -Wall -std=c++11 -o main main2.cpp EventLoop.cpp Channel.cpp Epoll.cpp IPaddress.cpp Acceptor.cpp Socket.cpp ServerSocket.cpp TCPServer.cpp TCPConnection.cpp  -lglog -lpthread 
+clang++ -g -Wall -std=c++11 -o main main2.cpp EventLoop.cpp Channel.cpp Epoll.cpp IPaddress.cpp Acceptor.cpp Socket.cpp ServerSocket.cpp TCPServer.cpp TCPConnection.cpp Buffer.cpp  -lglog -lpthread 

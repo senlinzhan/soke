@@ -1,3 +1,4 @@
+#include "Buffer.hpp"
 #include "Callback.hpp"
 #include "IPAddress.hpp"
 #include "EventLoop.hpp"
@@ -10,10 +11,9 @@ void onConnection(soke::TCPConnectionPtr conn)
     std::cout << "onConnection(): connection from " << std::endl;
 }
 
-void onMessage(soke::TCPConnectionPtr, const char *data, ssize_t len)
+void onMessage(soke::TCPConnectionPtr, soke::Buffer *buff)
 {
-    std::string message(data, len);
-    std::cout << "onMessage():" << message << std::endl;
+    std::cout << "onMessage(): " << buff->retrieveAsString();
 }
 
 int main(int argc, char *argv[])

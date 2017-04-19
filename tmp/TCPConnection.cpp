@@ -23,23 +23,21 @@ TCPConnection::TCPConnection(EventLoop *loop, TCPServer *server,
 
 void TCPConnection::handleRead()
 {
-    char buf[65535];
-    ssize_t n = ::read(channel_.fd(), buf, sizeof(buf));    
+    int savedErrno = 0;
+    ssize_t n = inputBuffer_.readFd(channel_.fd(), &savedErrno);
     if (n > 0)
     {
-        if (messageCallback_)
-        {
-            messageCallback_(shared_from_this(), buf, n);
-        }
+        messageCallback_(shared_from_this(), &inputBuffer_);
     }
     else if (n == 0)
     {
         channel_.disableAll();
-        server_->removeConnection(shared_from_this());
+        server_->removeConnection(shared_from_this());        
     }
     else
     {
-        LOG(ERROR) << "TCPConnection::handleRead() - read error: " << strerror(errno);
+        LOG(ERROR) << "TCPConnection::handleRead() - read error: "
+                   << strerror(savedErrno);        
     }
 }
 

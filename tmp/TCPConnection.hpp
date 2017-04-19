@@ -1,6 +1,7 @@
 #ifndef TCPCONNECTION_H
 #define TCPCONNECTION_H
 
+#include "Buffer.hpp"
 #include "Callback.hpp"
 #include "Channel.hpp"
 #include "IPAddress.hpp"
@@ -52,6 +53,7 @@ namespace soke
         Channel                  channel_;
         ConnectionCallback       connectionCallback_;
         MessageCallback          messageCallback_;
+        Buffer                   inputBuffer_;
     };    
 };
 

@@ -4,29 +4,31 @@
 #include <vector>
 #include <string>
 
-class Buffer
+namespace soke
 {
-public:
-    static const size_t kCheapPrepend = 8;
-    static const size_t kInitialSize  = 1024;
-    
-    Buffer();    
+    class Buffer
+    {
+    public:
+        static const size_t kCheapPrepend = 8;
+        static const size_t kInitialSize  = 1024;
+        
+        Buffer();    
 
-    size_t readableBytes() const;
-    size_t writableBytes() const;
-    size_t prependableBytes() const;
-    void append(const char *data, size_t len);
-    const char *peek() const;
-    void retrieve(size_t len);
-    std::string retrieveAsString();
-    
-private:
-    std::vector<char> buffer_;
-    size_t readerIndex_;
-    size_t writerIndex_;
+        size_t readableBytes() const;
+        size_t writableBytes() const;
+        size_t prependableBytes() const;
+        void append(const char *data, size_t len);
+        const char *peek() const;
+        void retrieve(size_t len);
+        std::string retrieveAsString();
+        ssize_t readFd(int fd, int *savedErrno);
+        
+    private:
+        std::vector<char> buffer_;
+        size_t readerIndex_;
+        size_t writerIndex_;
+    };
 };
-
-
 
 
 
