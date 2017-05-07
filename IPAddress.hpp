@@ -4,26 +4,29 @@
 #include <netinet/in.h>
 #include <string>
 
-class IPAddress
+namespace soke
 {
-public:
-    enum Type { ipv4, ipv6 };
+    class IPAddress
+    {
+    public:
+        enum Type { ipv4, ipv6 };
+        
+        IPAddress(const std::string &host, uint16_t port);
+        IPAddress(const sockaddr_storage &addr);
     
-    IPAddress(const std::string &host, uint16_t port);
-    IPAddress(const sockaddr_storage &addr);
-    
-    bool isIPv4() const;
-    bool isIPv6() const;    
-
-    std::string IPAddr() const;
-    uint16_t port() const;
-
-    std::string toString() const;    
-
-private:
-    Type        type_;
-    std::string host_;
-    uint16_t    port_;
-};
+        bool isIPv4() const;
+        bool isIPv6() const;    
+        
+        std::string IPAddr() const;
+        uint16_t port() const;
+        
+        std::string toString() const;    
+        
+    private:
+        Type        type_;
+        std::string host_;
+        uint16_t    port_;
+    };
+}
 
 #endif /* IPADDRESS_H */

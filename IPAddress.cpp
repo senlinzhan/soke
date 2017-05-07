@@ -9,7 +9,7 @@
 #include <netdb.h>
 #include <vector>
 
-using std::vector;
+using namespace soke;
 
 IPAddress::IPAddress(const std::string &host, uint16_t port)
     : host_(host), port_(port)
@@ -58,11 +58,10 @@ IPAddress::IPAddress(const sockaddr_storage &addr)
         return;
     }
     
-    unsigned short port;    
     const char *ptr = nullptr;
 
     size_t addrLen = isIPv4() ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN;    
-    vector<char> clientAddress(addrLen);    
+    std::vector<char> clientAddress(addrLen);    
     
     if (isIPv4())
     { 
